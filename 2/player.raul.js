@@ -21,6 +21,7 @@ module.exports = {
 		let input1 = 0, input2 = 0, found = false, loops = 0;
 		const WANTED = 19690720;
 		
+		
 		do {
 			const val = module.exports.part1(data, input1, input2);
 			
