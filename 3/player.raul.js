@@ -12,8 +12,8 @@ module.exports = {
 			wire.path.forEach(str => {
 				const direction = str[0];
 				const cells = Number(str.substr(1));
-				let incX = (direction == 'R') ? 1 : (direction == 'L' ? -1 : 0);
-				let incY = (direction == 'U') ? 1 : (direction == 'D' ? -1 : 0);
+				let incX = (direction === 'R') ? 1 : (direction === 'L' ? -1 : 0);
+				let incY = (direction === 'U') ? 1 : (direction === 'D' ? -1 : 0);
 				
 				for (let i=0; i<cells; i++) {
 					wire.x += incX;
