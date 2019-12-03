@@ -28,6 +28,14 @@ const part1 = (array, noun = 12, verb = 2) => {
   return intCode[0];
 };
 
+const trampoline = fn => (...args) => {
+  let result = fn(...args);
+  while (typeof result === 'function') {
+    result = result();
+  }
+  return result;
+};
+
 const part2 = (array, noun = 0, verb = 0, expectedValue = 19690720) => {
   const intCode = [...array];
 
@@ -39,7 +47,7 @@ const part2 = (array, noun = 0, verb = 0, expectedValue = 19690720) => {
     noun++;
   } else return -1;
 
-  return part2(intCode, noun, verb);
+  return trampoline(part2)(intCode, noun, verb);
 };
 
 module.exports = { part1, part2 };
