@@ -1,8 +1,8 @@
 const { range } = require('rxjs');
 const { filter, toArray } = require('rxjs/operators');
 
-const part1 = n => {
-  const values = n.split('-');
+const part1 = values => {
+  //const values = n.split('-');
   const source = range(values[0], values[1] - values[0]).pipe(
     filter(
       n =>
