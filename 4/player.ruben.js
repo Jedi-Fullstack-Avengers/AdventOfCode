@@ -1,27 +1,43 @@
-const Stream = require('stream');
-const { reduce, map } = require('../streamUtils');
+const { range } = require('rxjs');
+const { filter, reduce } = require('rxjs/operators');
 
-const getStream = () => {
-  var src = new Stream();
-  src.readable = true;
-  return src;
-};
+const hasSameAdjacentDigit = number =>
+  Array.from(number.toString()).reduce(
+    (acc, cur, idx, array) => (acc ? acc : cur === array[idx + 1]),
+    false
+  );
 
-const generateDataStream = stream => range => {
-  for (let i = range[0]; i < range[1]; i++) stream.emit('data', i);
-};
+const hasSameAdjacentDigitStrict = number =>
+  number
+    .toString()
+    .match(/(\d)\1*/g)
+    .reduce((acc, cur) => (acc ? acc : cur.length === 2), false);
+
+const isCrescendo = number =>
+  Array.from(number.toString()).every((cur, idx, array) => !(array[idx - 1] > cur));
 
 const part1 = input => {
-  const stream = getStream(input);
-  const generateData = generateDataStream(stream);
-  stream.pipe(map(acc => console.log(acc)));
-  //console.log(result);
-  generateData(input);
-  return 0;
+  let result;
+  range(input[0], input[1] - input[0])
+    .pipe(
+      filter(hasSameAdjacentDigit),
+      filter(isCrescendo),
+      reduce(acc => acc + 1, 0)
+    )
+    .subscribe(x => (result = x));
+  return result;
 };
 
 const part2 = input => {
-  return 0;
+  let result;
+  range(input[0], input[1] - input[0])
+    .pipe(
+      filter(hasSameAdjacentDigitStrict),
+      filter(isCrescendo),
+      reduce(acc => acc + 1, 0)
+    )
+    .subscribe(x => (result = x));
+  return result;
 };
 
 module.exports = { part1, part2 };
