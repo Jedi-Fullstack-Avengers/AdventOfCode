@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node ./index.js 4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "stream": "0.0.2"
+  },
   "devDependencies": {
     "nodemon": "1.18.4"
   }

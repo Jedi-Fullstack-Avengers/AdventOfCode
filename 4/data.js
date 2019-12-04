@@ -1,3 +1,3 @@
-const data = '240920-789857';
+const data = [246515,739105];
 
 exports.data = data;
