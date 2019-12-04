@@ -47,7 +47,7 @@ const part2 = (array, noun = 0, verb = 0, expectedValue = 19690720) => {
     noun++;
   } else return -1;
 
-  return trampoline(part2)(intCode, noun, verb);
+  return part2(intCode, noun, verb);
 };
 
 module.exports = { part1, part2 };
