@@ -9,6 +9,6 @@ const data = '240920-789857';
 ## Expected result
 
 ```sh
-1:
+1: 1154
 2:
 ```
