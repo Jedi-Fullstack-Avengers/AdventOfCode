@@ -4,7 +4,7 @@
   "description": "Simple Node Sandbox",
   "main": "./index.js",
   "scripts": {
-    "start": "node ./index.js 4"
+    "start": "node ./index.js 5"
   },
   "dependencies": {
     "stream": "0.0.2"

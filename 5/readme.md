@@ -1,3 +1,8 @@
+# [Advent of Code 2019](https://adventofcode.com/2019/day/5)
+
+## Data Test
+
+```javascript
 const data = [
   3,
   225,
@@ -678,5 +683,11 @@ const data = [
   99,
   226
 ];
+```
 
-exports.data = data;
+## Expected result
+
+```sh
+1: 13787043
+2:
+```
