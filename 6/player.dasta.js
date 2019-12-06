@@ -28,7 +28,7 @@ const navigator = (planet, map, origin = 'YOU', jumps = 0) => {
     if (orbitObject !== origin) {
       //console.log(`Going from ${planet} to ${orbitObject} with ${jumps} jumps`);
       const isValidRoute = navigator(orbitObject, map, planet, ++currentJumps);
-      if (isValidRoute !== -1) return testJumps;
+      if (isValidRoute !== -1) return isValidRoute;
     }
   }
 
@@ -60,7 +60,7 @@ const part2 = input => {
     }
   });
 
-  console.log(navigator(estellarMap['YOU'], estellarMap));
+  return navigator(estellarMap['YOU'], estellarMap);
 };
 
 module.exports = { part1, part2 };
