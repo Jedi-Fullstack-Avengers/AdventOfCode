@@ -3,7 +3,7 @@ const PARAM_MODES = { POSITION: '0', IMMEDIATE: '1' };
 const logger = [];
 
 const runProcess = input => (dataSource, index = 0) => {
-  data = [...dataSource];
+  const data = [...dataSource];
   const opAndModes = data[index].toString();
   const opcode = Number(opAndModes.substr(-2));
   const [mode1, mode2] = [
