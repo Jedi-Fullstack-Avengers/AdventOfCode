@@ -5,9 +5,7 @@ const part1 = input => {
   const estellarMap = {};
 
   input.forEach(value => {
-    const data = value.split(')');
-    const center = data[0];
-    const inOrbit = data[1];
+    const [center, inOrbit] = value.split(')');
     if (!estellarMap[inOrbit]) estellarMap[inOrbit] = [center];
   });
 
@@ -40,9 +38,7 @@ const part2 = input => {
   const estellarMap = {};
 
   input.forEach(value => {
-    const data = value.split(')');
-    const center = data[0];
-    const inOrbit = data[1];
+    const [center, inOrbit] = value.split(')');
     if (estellarMap[center] === undefined) {
       estellarMap[center] = [inOrbit];
       if (estellarMap[inOrbit] === undefined) {
