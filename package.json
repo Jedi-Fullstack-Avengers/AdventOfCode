@@ -7,6 +7,7 @@
     "start": "node ./index.js 6"
   },
   "dependencies": {
+    "ramda": "^0.26.1",
     "stream": "0.0.2"
   },
   "devDependencies": {
