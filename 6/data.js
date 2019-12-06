@@ -898,4 +898,20 @@ const data = [
 
 const data2 = ['COM)B', 'B)C', 'C)D', 'K)L', 'D)E', 'E)F', 'B)G', 'G)H', 'D)I', 'E)J', 'J)K'];
 
+const data3 = [
+  'COM)B',
+  'B)C',
+  'C)D',
+  'D)E',
+  'E)F',
+  'B)G',
+  'G)H',
+  'D)I',
+  'E)J',
+  'J)K',
+  'K)L',
+  'K)YOU',
+  'I)SAN'
+];
+
 exports.data = data;
