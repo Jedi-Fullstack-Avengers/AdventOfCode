@@ -90,14 +90,14 @@ const intCodeComputer = (input, phaseSetting, inputSignal) => {
   return solution;
 };
 
+// DAY 7 Related Code
+
 const getSignal = (input, higher, phaseSettings) => {
   let io = 0;
   phaseSettings.forEach(ps => {
-    //console.log(io);
     io = intCodeComputer(input, ps, io);
   });
 
-  //console.log('Signal: ', io);
   if (io > higher.signal) {
     higher.signal = io;
     higher.phaseSetting = phaseSettings;
