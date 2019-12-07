@@ -107,20 +107,17 @@ const getSignal = (input, higher, phaseSettings) => {
 };
 
 const permutation = array => {
-  function p(array, temp) {
-    var i, x;
-    if (!array.length) {
-      result.push(temp);
-    }
-    for (i = 0; i < array.length; i++) {
-      x = array.splice(i, 1)[0];
-      p(array, temp.concat(x));
+  const innerPermutation = (array, temp) => {
+    if (!array.length) result.push(temp);
+    for (let i = 0; i < array.length; i++) {
+      const x = array.splice(i, 1)[0];
+      innerPermutation(array, temp.concat(x));
       array.splice(i, 0, x);
     }
-  }
+  };
 
-  var result = [];
-  p(array, []);
+  const result = [];
+  innerPermutation(array, []);
   return result;
 };
 
