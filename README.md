@@ -27,6 +27,10 @@ Execute the challenge with the day number and compare the results.
 node index.js 'challengeDayNumber'
 ```
 
+## Join to our Leaderboard
+
+Go to the [Private Leaderboards](https://adventofcode.com/2019/leaderboard/private) and use the token `615803-2f4bdd84`.
+
 ## Help
 
 If you want to help, create a PR with improved versions of our codes, we want to learn! :)
