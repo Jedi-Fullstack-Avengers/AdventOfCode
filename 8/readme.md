@@ -10,6 +10,6 @@ const data =
 ## Expected result
 
 ```sh
-1: 
+1: 1572
 2: 
 ```
