@@ -1,111 +1,175 @@
-const opCodeSum = (store, values, position) => {
-  //console.log(`Sum ${values[0]}+${values[1]} on ${position}`);
-  store[position] = values[0] + values[1];
-  return store;
+const applyMod = (intCode, modParam, index, relativeBase) => {
+  switch (modParam) {
+    case 0:
+      return intCode[intCode[index]];
+    case 1:
+      return intCode[index];
+    case 2:
+      return intCode[intCode[index] + relativeBase];
+    default:
+      console.log(`Mod parametter ${modParam} not valid!`);
+      return -1;
+  }
 };
 
-const opCodeMul = (store, values, position) => {
-  //console.log(`Mul ${values[0]}*${values[1]} on ${position}`);
-  store[position] = values[0] * values[1];
-  return store;
+const applyModWrite = (intCode, modParam, index, relativeBase) => {
+  switch (modParam) {
+    case 0:
+    case 1:
+      return intCode[index];
+    case 2:
+      return intCode[index] + relativeBase;
+    default:
+      console.log(`Mod parametter ${modParam} not valid!`);
+      return -1;
+  }
 };
 
-const opCodeSave = (store, value, position) => {
-  //console.log(`Save ${value} on ${position}`);
-  store[position] = value;
-  return store;
+const getOpCodeAndMode = op => {
+  const opCode = op.length == 1 ? 0 + op : op[op.length - 2] + op[op.length - 1];
+  const mode = op.substring(0, op.length - 2);
+  const result = [
+    opCode,
+    mode
+      .split('')
+      .reverse()
+      .join('')
+  ];
+
+  return result;
 };
 
-const opCodeLoad = (store, value) => {
-  //console.log(`Load ${value} from ${value}`);
-  return store[value];
-};
-
-const lessThan = (store, values, position) => {
-  store[position] = values[0] < values[1] ? 1 : 0;
-  //console.log(`LessThan ${values[0] < values[1]} on ${position} found ${store[position]}`);
-};
-
-const equals = (store, values, position) => {
-  store[position] = values[0] == values[1] ? 1 : 0;
-  //console.log(`Equals ${values[0] == values[1]} on ${position} found ${store[position]}`);
-};
-
-const getOperation = value => {
-  return Array.from(value.toString()).reverse();
-};
-
-const getLoopLength = (opCode, modified) => {
-  if (opCode === 1 || opCode === 2 || opCode === 7 || opCode === 8) return 4;
-  if (opCode === 3 || opCode === 4) return 2;
-  return modified ? 0 : 3;
-};
-
-const intCodeComputer = (input, phaseSetting, inputSignal) => {
+const intCodeComputer = (input, userInput = 1, phaseSetting, start = 0) => {
   const intCode = [...input];
   let loopLength = 1;
-  let solution = 0;
+  let solution = [];
+  let relativeBase = 0;
+  let parameters = {};
+  let error = false;
 
-  for (let index = 0; index < intCode.length; index += loopLength) {
-    let modified = false;
-    const operation = getOperation(parseInt(intCode[index]));
-    if (operation[0] == 9 && operation[1] == 9) break;
+  for (let index = start; index < intCode.length && !error; index += loopLength) {
+    const operation = getOpCodeAndMode(intCode[index].toString());
     const opCode = parseInt(operation[0]);
-    //console.log('TCL: opCode', opCode);
+    if (opCode === 99) {
+      //console.log(`Operation ${opCode} - FINISH`);
+      break;
+    }
     const modParams = [
-      parseInt(operation[2] === undefined ? 0 : operation[2]),
-      parseInt(operation[3] === undefined ? 0 : operation[3])
+      parseInt(operation[1][0] === undefined ? 0 : operation[1][0]),
+      parseInt(operation[1][1] === undefined ? 0 : operation[1][1]),
+      parseInt(operation[1][2] === undefined ? 0 : operation[1][2])
     ];
-    //console.log('TCL: modParams', modParams);
 
-    const firstValuePos = intCode[index + 1];
-    const secondValuePos = intCode[index + 2];
-    const firstValue = modParams[0] === 0 ? intCode[firstValuePos] : firstValuePos;
-    const secondValue = modParams[1] === 0 ? intCode[secondValuePos] : secondValuePos;
-    const resultPosition = intCode[index + 3];
+    /*console.log(
+      `Operation ${opCode}: ${modParams} @${index}-${intCode[index]}:${intCode[index + 1]}:${
+        intCode[index + 2]
+      }:${intCode[index + 3]}`
+    );*/
 
-    //console.log(`Using values: ${firstValue}|${secondValue}`);
+    switch (opCode) {
+      case 1:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase),
+          result: applyModWrite(intCode, modParams[2], index + 3, relativeBase)
+        };
 
-    if (opCode === 1) opCodeSum(intCode, [firstValue, secondValue], resultPosition);
-    else if (opCode === 2) opCodeMul(intCode, [firstValue, secondValue], resultPosition);
-    else if (opCode === 3) {
-      opCodeSave(intCode, phaseSetting === -1 ? inputSignal : phaseSetting, firstValuePos);
-      phaseSetting = -1;
-    } else if (opCode === 4) solution = opCodeLoad(intCode, firstValuePos);
-    else if (opCode === 5) {
-      if (firstValue != 0) {
-        index = secondValue;
-        modified = true;
-      }
-    } else if (opCode === 6) {
-      if (firstValue == 0) {
-        index = secondValue;
-        modified = true;
-      }
-    } else if (opCode === 7) lessThan(intCode, [firstValue, secondValue], resultPosition);
-    else if (opCode === 8) equals(intCode, [firstValue, secondValue], resultPosition);
-    loopLength = getLoopLength(opCode, modified);
+        intCode[parameters.result] = parameters.first + parameters.second;
+        loopLength = 4;
+        break;
+      case 2:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase),
+          result: applyModWrite(intCode, modParams[2], index + 3, relativeBase)
+        };
+
+        intCode[parameters.result] = parameters.first * parameters.second;
+        loopLength = 4;
+        break;
+      case 3:
+        intCode[applyModWrite(intCode, modParams[0], index + 1, relativeBase)] =
+          phaseSetting === -1 ? userInput : phaseSetting;
+        phaseSetting = -1;
+        loopLength = 2;
+        break;
+      case 4:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase)
+        };
+
+        loopLength = 2;
+        solution = parameters.first;
+        break;
+      case 5:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase)
+        };
+
+        if (parameters.first != 0) {
+          index = parameters.second;
+          loopLength = 0;
+        } else {
+          loopLength = 3;
+        }
+        break;
+      case 6:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase)
+        };
+
+        if (parameters.first == 0) {
+          index = parameters.second;
+          loopLength = 0;
+        } else {
+          loopLength = 3;
+        }
+        break;
+      case 7:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase),
+          result: applyModWrite(intCode, modParams[2], index + 3, relativeBase)
+        };
+
+        intCode[parameters.result] = parameters.first < parameters.second ? 1 : 0;
+        loopLength = 4;
+        break;
+      case 8:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase),
+          second: applyMod(intCode, modParams[1], index + 2, relativeBase),
+          result: applyModWrite(intCode, modParams[2], index + 3, relativeBase)
+        };
+
+        intCode[parameters.result] = parameters.first == parameters.second ? 1 : 0;
+        loopLength = 4;
+        break;
+      case 9:
+        parameters = {
+          first: applyMod(intCode, modParams[0], index + 1, relativeBase)
+        };
+
+        relativeBase += parameters.first;
+        loopLength = 2;
+        break;
+
+      default:
+        console.log(`Operation code ${opCode} not valid!`);
+        error = true;
+        break;
+    }
+    //console.log('Parameters:', parameters);
+    //console.log(`After operation ${opCode}: ${intCode[parameters.result]}`);
+    //console.log('relativeBase', relativeBase);
   }
 
   return solution;
 };
 
 // DAY 7 Related Code
-
-const getSignal = (input, higher, phaseSettings) => {
-  let io = 0;
-  phaseSettings.forEach(ps => {
-    io = intCodeComputer(input, ps, io);
-  });
-
-  if (io > higher.signal) {
-    higher.signal = io;
-    higher.phaseSetting = phaseSettings;
-  }
-
-  return higher;
-};
-
 const permutation = array => {
   const innerPermutation = (array, temp) => {
     if (!array.length) result.push(temp);
@@ -122,12 +186,14 @@ const permutation = array => {
 };
 
 const part1 = input => {
-  let higher = { signal: 0, phaseSetting: [0, 0, 0, 0, 0, 0] };
+  let maxSignal = 0;
   permutation([0, 1, 2, 3, 4]).forEach(phaseSettings => {
-    getSignal(input, higher, phaseSettings);
+    let io = 0;
+    phaseSettings.forEach(ps => (io = intCodeComputer(input, io, ps)));
+    if (io > maxSignal) maxSignal = io;
   });
 
-  return higher.signal;
+  return maxSignal;
 };
 
 const part2 = input => {};
