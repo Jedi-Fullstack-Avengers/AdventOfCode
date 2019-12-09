@@ -169,4 +169,4 @@ const part1 = (input, userInput = 1) => {
 
 const part2 = input => {};
 
-module.exports = { part1, part2 };
+module.exports = { part1, part2: input => part1(input, 2) };
