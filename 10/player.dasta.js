@@ -1,6 +1,6 @@
 const calculateSlope = (origin, target) => {
   return {
-    direction: Math.atan2(origin.x - target.x, origin.y - target.y),
+    ang: Math.atan2(origin.x - target.x, origin.y - target.y),
     slope: reduce(target.y - origin.y, target.x - origin.x).join()
   };
 };
@@ -23,8 +23,7 @@ const sonar = (map, coordinates) => {
         if (
           !vectors.some(
             registeredVector =>
-              registeredVector.direction === vector.direction &&
-              registeredVector.slope === vector.slope
+              registeredVector.ang === vector.ang && registeredVector.slope === vector.slope
           )
         )
           vectors.push(vector);
