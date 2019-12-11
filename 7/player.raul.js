@@ -1,6 +1,6 @@
 const IntCode = require('../5/raul.IntCode.js');
 
-const _part1 = data => {
+const part1 = data => {
   const phaseSettings = permutation([0, 1, 2, 3, 4]);
   let maxSignal = 0;
 
@@ -88,4 +88,4 @@ const permutation = array => {
   return result;
 };
 
-module.exports = { _part1, part2 };
+module.exports = { part1, part2 };
