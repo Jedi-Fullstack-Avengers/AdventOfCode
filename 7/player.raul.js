@@ -1,41 +1,77 @@
 const IntCode = require('../5/raul.IntCode.js');
 
-const part1 = data => {
-	const phaseSettings = [0, 1, 2, 3, 4];
-	let maxSignal = 0;
-	
-	permutation(phaseSettings).forEach(phases => {
-		let signal = 0;
-		
-		phases.forEach(phase => {
-			signal = IntCode.run(data)([phase, signal])();
-		});
-		 
-		if (signal > maxSignal) maxSignal = signal;
-	});
-	
-	return maxSignal;
+const _part1 = data => {
+  const phaseSettings = permutation([0, 1, 2, 3, 4]);
+  let maxSignal = 0;
+
+  phaseSettings.forEach(phases => {
+    let signal = 0;
+
+    phases.forEach(phase => {
+      const intCode = new IntCode({ data: data, inputs: [phase, signal] });
+      signal = intCode.run();
+    });
+
+    if (signal > maxSignal) maxSignal = signal;
+  });
+
+  return maxSignal;
 };
 
 const part2 = data => {
-	return false;
-	const phaseSettings = [5, 6, 7, 8, 9];
-	let maxSignal = 0;
-	
-	permutation(phaseSettings).forEach(phases => {
-		let signal = 0;
-		
-		phases.forEach(phase => {
-			signal = IntCode.run(data)([phase, signal])();
-		});
-		 
-		if (signal > maxSignal) maxSignal = signal;
-	});
-	
-	return maxSignal;
+  const phaseOptions = [5, 6, 7, 8, 9];
+  const phaseSettings = permutation(phaseOptions); //[phaseOptions];
+  const intCodes = [];
+  let pending = phaseSettings.length * phaseOptions.length;
+  let maxSignal = 0;
+
+  phaseSettings.forEach((phases, i) => {
+    let signal = 0;
+
+    intCodes[i] = [];
+
+    phases.forEach((phase, j) => {
+      intCodes[i][j] = new IntCode({
+        id: `ROBOT-${i}-${j}`,
+        data: data,
+        inputs: j === 0 ? [phase, 0] : [phase],
+        onOutput: function(obj, val) {
+          const jNext = this.jVal + 1 === phaseOptions.length ? 0 : this.jVal + 1;
+          const intCodeNext = intCodes[this.iVal][jNext];
+
+          //console.log(`OUTPUT ${val} OF ${obj.id} INSERTED IN ${intCodeNext.id}`);
+          obj.status = 'PAUSED';
+          intCodeNext.inputs.push(val);
+
+          if (
+            intCodeNext.status === 'OFF' ||
+            intCodeNext.status === 'WAITING_READ' ||
+            intCodeNext.status === 'PAUSED'
+          ) {
+            intCodeNext.status = 'ON';
+            intCodeNext.run();
+          }
+        }.bind({ iVal: i, jVal: j }),
+        onEnd: function(obj, lastOutput) {
+          if (this.jVal + 1 === phaseOptions.length) {
+            if (lastOutput > maxSignal) maxSignal = lastOutput;
+          }
+
+          //console.log(`END ${obj.id}`);
+          if (--pending === 0) {
+            //console.log("maxSignal = ", maxSignal);
+          }
+        }.bind({ iVal: i, jVal: j })
+      });
+    });
+  });
+
+  phaseSettings.forEach((phases, i) => {
+    intCodes[i][0].run();
+  });
+
+  return maxSignal;
 };
-
-
 
 const permutation = array => {
   const innerPermutation = (array, temp) => {
@@ -52,74 +88,4 @@ const permutation = array => {
   return result;
 };
 
-/*
-[0,1,2]
-
-[1,0,2]
-[2,1,0]
-
--------[1,0,2]
-[0,2,1]
-
--------[2,1,0]
--------[0,2,1]
-
-
-
-[2,0,1]
-[0,2,1]
-[2,1,0]
-[1,2,0]
-
-[0,1,2,3,4]
-...
-[4, 3, 2, 1, 0]
-*/
-/*
-const getCombinations = ([...data]) => ([...result] = []) => {
-	if (result.length === factorial(data.length)) return result;
-	
-	if (result.length === 0) {
-		result.push(data);
-	} else {
-		
-	}
-	
-	return getCombinations(data)(result);
-};
-
-const factorial(num) {
-    if (num === 0) return 1;
-    return num * factorial(num - 1);
-}
-*/
-
-module.exports = {part1, part2};
-
-/*
-The first amplifier's input value is 0
-it will first use an input instruction to ask the amplifier for its current phase setting (an integer from 0 to 4)
------
-Most of the amplifiers are connected as they were before; amplifier A's output is connected to amplifier B's input, and so on. However, the output from amplifier E is now connected into amplifier A's input. This creates the feedback loop: the signal will be sent through the amplifiers many times.
-
-In feedback loop mode, the amplifiers need totally different phase settings: integers from 5 to 9, again each used exactly once. These settings will cause the Amplifier Controller Software to repeatedly take input and produce output many times before halting. Provide each amplifier its phase setting at its first input instruction; all further input/output instructions are for signals.
-
-Don't restart the Amplifier Controller Software on any amplifier during this process. Each one should continue receiving and sending signals until it halts.
-
-All signals sent or received in this process will be between pairs of amplifiers except the very first signal and the very last signal. To start the process, a 0 signal is sent to amplifier A's input exactly once.
-
-Eventually, the software on the amplifiers will halt after they have processed the final loop. When this happens, the last output signal from amplifier E is sent to the thrusters. Your job is to find the largest output signal that can be sent to the thrusters using the new phase settings and feedback loop arrangement.
-
-Here are some example programs:
-
-Max thruster signal 139629729 (from phase setting sequence 9,8,7,6,5):
-
-3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,
-27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
-Max thruster signal 18216 (from phase setting sequence 9,7,8,5,6):
-
-3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,
--5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,
-53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
-Try every combination of the new phase settings on the amplifier feedback loop. What is the highest signal that can be sent to the thrusters?
-*/
+module.exports = { _part1, part2 };
