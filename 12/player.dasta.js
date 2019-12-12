@@ -94,36 +94,36 @@ const part1 = input => {
 };
 
 const part2 = input => {
-  let timeLapse = 0;
-  const CelestialSystem = getCelestialSystem(
-    input.map((celestialObject, index) => {
-      const coordinates = celestialObject.match(/-*(\d+)/g);
-      return getCelestialObject(moonNames[index], {
-        x: parseInt(coordinates[0]),
-        y: parseInt(coordinates[1]),
-        z: parseInt(coordinates[2])
-      });
-    })
-  );
+  // let timeLapse = 0;
+  // const CelestialSystem = getCelestialSystem(
+  //   input.map((celestialObject, index) => {
+  //     const coordinates = celestialObject.match(/-*(\d+)/g);
+  //     return getCelestialObject(moonNames[index], {
+  //       x: parseInt(coordinates[0]),
+  //       y: parseInt(coordinates[1]),
+  //       z: parseInt(coordinates[2])
+  //     });
+  //   })
+  // );
 
-  let next = true;
+  // let next = true;
 
-  do {
-    CelestialSystem.updateSystem();
-    CelestialSystem.moveSystem();
-    timeLapse++;
+  // do {
+  //   CelestialSystem.updateSystem();
+  //   CelestialSystem.moveSystem();
+  //   timeLapse++;
 
-    if (
-      CelestialSystem.celestialObjects[0].getKineticEnergy() === 0 &&
-      CelestialSystem.celestialObjects[1].getKineticEnergy() === 0 &&
-      CelestialSystem.celestialObjects[2].getKineticEnergy() === 0 &&
-      CelestialSystem.celestialObjects[3].getKineticEnergy() === 0
-    ) {
-      next = false;
-    }
-  } while (next);
+  //   if (
+  //     CelestialSystem.celestialObjects[0].getKineticEnergy() === 0 &&
+  //     CelestialSystem.celestialObjects[1].getKineticEnergy() === 0 &&
+  //     CelestialSystem.celestialObjects[2].getKineticEnergy() === 0 &&
+  //     CelestialSystem.celestialObjects[3].getKineticEnergy() === 0
+  //   ) {
+  //     next = false;
+  //   }
+  // } while (next);
 
-  return timeLapse * 2;
+  // return timeLapse * 2;
 };
 
 module.exports = { part1, part2 };
