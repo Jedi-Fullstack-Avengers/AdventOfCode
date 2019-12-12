@@ -37,14 +37,6 @@ const getCelestialObject = (
         this.getTotalEnergy(),
         this.getValue()
       );
-    },
-    getValue: function() {
-      return (
-        this.name +
-        Object.values(this.position).join(',') +
-        ',' +
-        Object.values(this.velocity).join(',')
-      );
     }
   };
 };
@@ -52,7 +44,6 @@ const getCelestialObject = (
 const getCelestialSystem = celestialObjects => {
   return {
     celestialObjects: celestialObjects,
-    previousState: {},
     updateSystem: function() {
       this.celestialObjects.forEach(celestialObject => {
         this.celestialObjects.forEach(co => {
@@ -75,20 +66,6 @@ const getCelestialSystem = celestialObjects => {
       this.celestialObjects.forEach(celestialObject => {
         celestialObject.checkStatus();
       });
-    },
-    registerState: function() {
-      const hash = this.celestialObjects.reduce(
-        (accumulator, celestialObject) => accumulator + celestialObject.getValue(),
-        0
-      );
-      this.previousState[hash] = 1;
-    },
-    isPreviousState: function() {
-      const hash = this.celestialObjects.reduce(
-        (accumulator, celestialObject) => accumulator + celestialObject.getValue(),
-        0
-      );
-      return this.previousState[hash] === 1;
     }
   };
 };
@@ -118,7 +95,7 @@ const part1 = input => {
 
 const part2 = input => {
   let timeLapse = 0;
-  const CelestialSystem2 = getCelestialSystem(
+  const CelestialSystem = getCelestialSystem(
     input.map((celestialObject, index) => {
       const coordinates = celestialObject.match(/-*(\d+)/g);
       return getCelestialObject(moonNames[index], {
@@ -129,14 +106,24 @@ const part2 = input => {
     })
   );
 
-  do {
-    CelestialSystem2.registerState();
-    CelestialSystem2.updateSystem();
-    CelestialSystem2.moveSystem();
-    timeLapse++;
-  } while (!CelestialSystem2.isPreviousState());
+  let next = true;
 
-  return timeLapse;
+  do {
+    CelestialSystem.updateSystem();
+    CelestialSystem.moveSystem();
+    timeLapse++;
+
+    if (
+      CelestialSystem.celestialObjects[0].getKineticEnergy() === 0 &&
+      CelestialSystem.celestialObjects[1].getKineticEnergy() === 0 &&
+      CelestialSystem.celestialObjects[2].getKineticEnergy() === 0 &&
+      CelestialSystem.celestialObjects[3].getKineticEnergy() === 0
+    ) {
+      next = false;
+    }
+  } while (next);
+
+  return timeLapse * 2;
 };
 
 module.exports = { part1, part2 };
