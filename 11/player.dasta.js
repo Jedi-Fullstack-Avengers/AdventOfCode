@@ -42,7 +42,7 @@ const getOpCodeAndMode = op => {
 const intCodeComputer = (input, userInput, cache) => {
   const intCode = [...input];
   let loopLength = 1;
-  let relativeBase = 0;
+  let relativeBase = cache !== undefined ? cache.relativeBase : 0;
   let parameters = {};
   let error = false;
   let waiting = false;
@@ -55,7 +55,7 @@ const intCodeComputer = (input, userInput, cache) => {
     const operation = getOpCodeAndMode(intCode[index].toString());
     const opCode = parseInt(operation[0]);
     if (opCode === 99) {
-      cache.saveCache(intCode, opCode, index);
+      cache.saveCache(intCode, opCode, index, relativeBase);
       break;
     }
     const modParams = [
@@ -89,8 +89,10 @@ const intCodeComputer = (input, userInput, cache) => {
         loopLength = 2;
         if (userInput === undefined) {
           if (cache.halt(opCode, userInput)) {
-            cache.saveCache(intCode, opCode, index + loopLength);
+            cache.saveCache(intCode, opCode, index + loopLength, relativeBase);
             waiting = true;
+          } else {
+            intCode[applyModWrite(intCode, modParams[0], index + 1, relativeBase)] = userInput;
           }
         } else {
           intCode[applyModWrite(intCode, modParams[0], index + 1, relativeBase)] = userInput;
@@ -104,7 +106,7 @@ const intCodeComputer = (input, userInput, cache) => {
         loopLength = 2;
         cache.output.push(parameters.first);
         if (cache.halt(opCode, userInput)) {
-          cache.saveCache(intCode, opCode, index + loopLength);
+          cache.saveCache(intCode, opCode, index + loopLength, relativeBase);
           waiting = true;
         }
         break;
@@ -173,75 +175,79 @@ const intCodeComputer = (input, userInput, cache) => {
   return cache;
 };
 
-const Navigator = {
-  directions: ['^', '>', 'v', '<'],
-  direction: '^',
-  position: [0, 0],
-  route: { '0,0': 0 },
-  paintedSpots: { '0,0': 0 },
-  advance: function() {
-    switch (this.direction) {
-      case '^':
-        this.position[1] -= 1;
-        break;
-      case 'v':
-        this.position[1] += 1;
-        break;
-      case '>':
-        this.position[0] += 1;
-        break;
-      case '<':
-        this.position[0] -= 1;
-        break;
-      default:
-        console.log(this.direction, 'Invalid direction!');
-        break;
-    }
+const getNavigator = firstPositionColor => {
+  return {
+    directions: ['^', '>', 'v', '<'],
+    direction: '^',
+    position: [0, 0],
+    route: { '0,0': firstPositionColor },
+    paintedSpots: {},
+    advance: function() {
+      switch (this.direction) {
+        case '^':
+          this.position[1] -= 1;
+          break;
+        case 'v':
+          this.position[1] += 1;
+          break;
+        case '>':
+          this.position[0] += 1;
+          break;
+        case '<':
+          this.position[0] -= 1;
+          break;
+        default:
+          console.log(this.direction, 'Invalid direction!');
+          break;
+      }
 
-    if (this.route[this.position.join(',')] === undefined) this.route[this.position.join(',')] = 0;
-  },
-  updateDirection: function(value) {
-    // Turn left
-    if (value === 0) {
-      const currentDirection = this.directions.findIndex(element => element === this.direction);
-      if (currentDirection === 0) {
-        this.direction = this.directions[this.directions.length - 1];
+      if (this.route[this.position.join(',')] === undefined)
+        this.route[this.position.join(',')] = 0;
+    },
+    updateDirection: function(value) {
+      // Turn left
+      if (value === 0) {
+        const currentDirection = this.directions.findIndex(element => element === this.direction);
+        if (currentDirection === 0) {
+          this.direction = this.directions[this.directions.length - 1];
+        } else {
+          this.direction = this.directions[currentDirection - 1];
+        }
+        //Turn right
+      } else if (value === 1) {
+        const currentDirection = this.directions.findIndex(element => element === this.direction);
+        if (currentDirection === this.directions.length - 1) {
+          this.direction = this.directions[0];
+        } else {
+          this.direction = this.directions[currentDirection + 1];
+        }
       } else {
-        this.direction = this.directions[currentDirection - 1];
+        console.log(value, 'Invalid direction degrees!');
       }
-      //Turn right
-    } else if (value === 1) {
-      const currentDirection = this.directions.findIndex(element => element === this.direction);
-      if (currentDirection === this.directions.length - 1) {
-        this.direction = this.directions[0];
+    },
+    paint: function(colorToPaint) {
+      const floorColor = this.route[this.position.join(',')];
+      this.route[this.position.join(',')] = colorToPaint;
+      if (floorColor !== colorToPaint) {
+        //console.log(`Painting ${colorToPaint} on ${this.position.join(',')}`);
+        this.paintedSpots[this.position.join(',')] = colorToPaint;
       } else {
-        this.direction = this.directions[currentDirection + 1];
+        //console.log(`${this.position.join(',')} already painted with ${colorToPaint}`);
       }
-    } else {
-      console.log(value, 'Invalid direction degrees!');
+    },
+    getFloorColor: function() {
+      const floorColor = this.route[this.position.join(',')];
+      return floorColor !== undefined ? floorColor : undefined;
     }
-  },
-  paint: function(colorToPaint) {
-    const floorColor = this.route[this.position.join(',')];
-    this.route[this.position.join(',')] = colorToPaint;
-    if (floorColor !== colorToPaint) {
-      //console.log(`Painting ${colorToPaint} on ${this.position.join(',')}`);
-      this.paintedSpots[this.position.join(',')] = colorToPaint;
-    } else {
-      console.log(`${this.position.join(',')} already painted with ${colorToPaint}`);
-    }
-  },
-  getFloorColor: function() {
-    const floorColor = this.route[this.position.join(',')];
-    return floorColor !== undefined ? floorColor : undefined;
-  }
+  };
 };
 
-const part1 = (input, part2 = false) => {
+const part1 = (input, firstPositionColor = 0, part2 = false) => {
   let hullPaintingRobot = {
     intCode: input,
     opCode: 0,
     position: 0,
+    relativeBase: 0,
     output: [],
     halt: function(opCode, input) {
       if (opCode === 99) return true;
@@ -249,19 +255,24 @@ const part1 = (input, part2 = false) => {
       if (opCode === 4 && this.output.length > 1) return true;
       return false;
     },
-    saveCache: function(intCode, opCode, position) {
+    saveCache: function(intCode, opCode, position, relativeBase) {
       this.intCode = intCode;
       this.opCode = opCode;
       this.position = position;
+      this.relativeBase = relativeBase;
     },
     resetOutput: function() {
       this.output = [];
     }
   };
+  const Navigator = getNavigator(firstPositionColor);
 
   while (hullPaintingRobot.opCode != 99) {
-    const floorColor = Navigator.getFloorColor();
-    hullPaintingRobot = intCodeComputer(hullPaintingRobot.intCode, floorColor, hullPaintingRobot);
+    hullPaintingRobot = intCodeComputer(
+      hullPaintingRobot.intCode,
+      Navigator.getFloorColor(),
+      hullPaintingRobot
+    );
 
     if (
       hullPaintingRobot.opCode != 99 &&
@@ -279,22 +290,11 @@ const part1 = (input, part2 = false) => {
 };
 
 const part2 = input => {
-  const paintedSpots = part1(input, true);
-  let maxX, minX, maxY, minY;
-
-  Object.entries(paintedSpots).forEach(spot => {
-    const x = parseInt(spot[0].split(',')[0]);
-    const y = parseInt(spot[0].split(',')[1]);
-
-    if (maxX === undefined || (x >= 0 && x > maxX)) maxX = x;
-    if (maxY === undefined || (y >= 0 && y > maxY)) maxY = y;
-    if (minX === undefined || (x < 0 && x < minX)) minX = x;
-    if (minY === undefined || (y < 0 && y < minY)) minY = x;
-  });
+  const paintedSpots = part1(input, 1, true);
 
   const layout = {
-    wide: Math.abs(minX) + Math.abs(maxX),
-    tall: Math.abs(minY) + Math.abs(maxY) / 2,
+    wide: 50,
+    tall: 40,
     data: []
   };
 
@@ -303,7 +303,7 @@ const part2 = input => {
       if (layout.data[i] === undefined) layout.data[i] = [];
       const pixelColor = paintedSpots[`${i},${j}`];
       if (pixelColor === 1) layout.data[i][j] = '#';
-      else layout.data[i][j] = '.';
+      else layout.data[i][j] = ' ';
     }
   }
 
@@ -314,7 +314,7 @@ const part2 = input => {
     console.log();
   }
 
-  return null;
+  return Object.keys(paintedSpots).length;
 };
 
 module.exports = { part1, part2 };
