@@ -294,7 +294,7 @@ const part2 = input => {
 
   const layout = {
     wide: 50,
-    tall: 40,
+    tall: 50,
     data: []
   };
 
@@ -309,7 +309,11 @@ const part2 = input => {
 
   for (let i = 0; i < layout.tall; i++) {
     for (let j = 0; j < layout.wide; j++) {
-      process.stdout.write(layout.data[i][j]);
+      if (layout.data[j] === undefined || layout.data[j][i] === undefined) {
+        process.stdout.write(' ');
+      } else {
+        process.stdout.write(layout.data[j][i]);
+      }
     }
     console.log();
   }

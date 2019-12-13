@@ -6,8 +6,8 @@ const getGame = () => {
     gameElements: [' ', '|', '#', '_', 'o'],
     blocks: 0,
     printGame: function() {
-      this.gameLayout.forEach((rows, x) => {
-        rows.forEach((element, y) => {
+      this.gameLayout.forEach(rows => {
+        rows.forEach(element => {
           process.stdout.write(element);
         });
         console.log();
@@ -27,12 +27,12 @@ const part1 = input => {
       const x = Controller.output[0];
       const y = Controller.output[1];
       const element = Controller.output[2];
-      if (Game.gameLayout[x] === undefined) Game.gameLayout[x] = [];
+      if (Game.gameLayout[y] === undefined) Game.gameLayout[y] = [];
       if (element < Game.gameElements.length) {
-        Game.gameLayout[x][y] = Game.gameElements[element];
+        Game.gameLayout[y][x] = Game.gameElements[element];
         if (element === 2) Game.blocks++;
       } else {
-        Game.gameLayout[x][y] = Game.gameElements[0];
+        Game.gameLayout[y][x] = Game.gameElements[0];
         console.log(element, 'Not a valid element!');
       }
       Controller.resetOutput();
