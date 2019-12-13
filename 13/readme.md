@@ -2574,6 +2574,6 @@ const data = [
 ## Expected result
 
 ```sh
-1:
+1: 369
 2:
 ```
