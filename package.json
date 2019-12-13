@@ -4,7 +4,7 @@
   "description": "Simple Node Sandbox",
   "main": "./index.js",
   "scripts": {
-    "start": "node ./index.js 11"
+    "start": "node ./index.js 13"
   },
   "dependencies": {
     "ramda": "^0.26.1",
