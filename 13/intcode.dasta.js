@@ -39,7 +39,7 @@ const getOpCodeAndMode = op => {
   return result;
 };
 
-const intCodeComputer = (input, userInput, cache) => {
+const intCodeComputer = (input, userInput = [], cache) => {
   const intCode = [...input];
   let loopLength = 1;
   let relativeBase = cache !== undefined ? cache.relativeBase : 0;
@@ -87,15 +87,12 @@ const intCodeComputer = (input, userInput, cache) => {
         break;
       case 3:
         loopLength = 2;
-        if (userInput === undefined) {
-          if (cache.halt(opCode, userInput)) {
-            cache.saveCache(intCode, opCode, index + loopLength, relativeBase);
-            waiting = true;
-          } else {
-            intCode[applyModWrite(intCode, modParams[0], index + 1, relativeBase)] = userInput;
-          }
+        if (userInput.length === 0) {
+          cache.saveCache(intCode, opCode, index, relativeBase);
+          waiting = true;
         } else {
-          intCode[applyModWrite(intCode, modParams[0], index + 1, relativeBase)] = userInput;
+          const position = applyModWrite(intCode, modParams[0], index + 1, relativeBase);
+          intCode[position] = userInput.shift();
         }
         break;
       case 4:
@@ -184,7 +181,7 @@ let getIntCodeController = (intCode, outputHaltIterations = 1) => {
     output: [],
     halt: function(opCode, input) {
       if (opCode === 99) return true;
-      if (opCode === 3 && input === undefined) return true;
+      if (opCode === 3 && input.length === 0) return true;
       if (opCode === 4 && this.output.length === outputHaltIterations) return true;
       return false;
     },
