@@ -111,4 +111,4 @@ const data5 = [
   '5 BHXH, 4 VRPVC => 5 LTCX'
 ]; // 2210736 | 460664 
 
-exports.data = data5;
+exports.data = data;
