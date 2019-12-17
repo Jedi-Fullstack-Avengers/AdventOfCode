@@ -84,13 +84,11 @@ const part1 = input => {
 };
 const part2 = input => {
   // const NanoFactory = getNanoFactory(input);
-
   // do {
   //   NanoFactory.chemicalReaction('FUEL');
   //   NanoFactory.fuel++;
   // } while (NanoFactory.totalRawMaterial <= 1000000000000);
-
-  // return NanoFactory.fuel;
+  // return NanoFactory.fuel - 1;
 };
 
 module.exports = { part1, part2 };
